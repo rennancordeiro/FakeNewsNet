@@ -3,10 +3,9 @@ import logging
 import time
 import requests
 
-from twython import Twython
+import tweepy
 
-
-class TwythonConnector:
+class TweepyConnector:
 
     def __init__(self, keys_server_url, key_file):
         self.streams = []
@@ -35,21 +34,26 @@ class TwythonConnector:
         }
 
         if connection_mode == 1:  # User auth mode
-            return Twython(app_key=app_key, app_secret=app_secret, oauth_token=oauth_token,
-                           oauth_token_secret=oauth_token_secret, client_args=client_args)
+            return tweepy.Client(
+                consumer_key=app_key,
+                consumer_secret=app_secret,
+                access_token=oauth_token,
+                access_token_secret=oauth_token_secret
+            )
 
-        elif connection_mode == 0:  # App auth mode - more requests are allowed
-            # TODO: Fix the code later - app auth has more limit
-            # twitter = Twython(app_key, app_secret, oauth_version=2)
-            # access_token = twitter.obtain_access_token()
-            # return Twython(app_key, access_token=access_token)
+        elif connection_mode == 0:  # App auth mode - more requests are allowe
+            pass
+        #     # TODO: Fix the code later - app auth has more limit
+        #     # twitter = Twython(app_key, app_secret, oauth_version=2)
+        #     # access_token = twitter.obtain_access_token()
+        #     # return Twython(app_key, access_token=access_token)
 
-            twitter = Twython(app_key, app_secret, oauth_version=2)
-            ACCESS_TOKEN = twitter.obtain_access_token()
-            twython = Twython(app_key, access_token=ACCESS_TOKEN)
-            return twython
+        #     twitter = Twython(app_key, app_secret, oauth_version=2)
+        #     ACCESS_TOKEN = twitter.obtain_access_token()
+        #     twython = Twython(app_key, access_token=ACCESS_TOKEN)
+        #     return twython
 
-    def get_twython_connection(self, resource_type):
+    def get_tweepy_connection(self, resource_type):
         """
         Returns the twython object for making the requests and sleeps if all the twitter keys have reached the usage
         limits
@@ -63,8 +67,10 @@ class TwythonConnector:
         # consuming message from Kafka
         while True:
             response = requests.get(self.url + resource_type)
+            print(self.url + resource_type)
             if response.status_code == 200:
                 response = json.loads(response.text)
+                print(response)
                 if response["status"] == 200:
                     print("resource id : {}".format(response["id"]))
                     return response["id"]

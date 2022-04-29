@@ -6,7 +6,7 @@ from multiprocessing.pool import Pool
 
 from tqdm import tqdm
 
-from util.TwythonConnector import TwythonConnector
+from util.TweepyConnector import TweepyConnector
 
 
 class News:
@@ -36,7 +36,7 @@ class Config:
         self.tweet_keys_file = tweet_keys_file
         self.num_process = num_process
 
-        self.twython_connector = TwythonConnector("localhost:5000", tweet_keys_file)
+        self.tweepy_connector = TweepyConnector("localhost:5000", tweet_keys_file)
 
 
 

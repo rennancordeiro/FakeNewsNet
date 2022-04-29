@@ -4,14 +4,14 @@ from twython import TwythonError, TwythonRateLimitError
 
 
 from tweet_collection import Tweet
-from util.TwythonConnector import TwythonConnector
+from util.TweepyConnector import TweepyConnector
 from util.util import create_dir, Config, multiprocess_data_collection
 
 from util.util import DataCollector
 from util import Constants
 
 
-def dump_retweets_job(tweet: Tweet, config: Config, twython_connector: TwythonConnector):
+def dump_retweets_job(tweet: Tweet, config: Config, twython_connector: TweepyConnector):
     retweets = []
     connection = None
     try:

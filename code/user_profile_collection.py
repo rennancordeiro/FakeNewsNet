@@ -5,7 +5,7 @@ from pathlib import Path
 from twython import TwythonError, TwythonRateLimitError
 
 from util.Constants import GET_USER, GET_USER_TWEETS, USER_ID, FOLLOWERS, GET_FRIENDS_ID, FOLLOWING
-from util.TwythonConnector import TwythonConnector
+from util.TweepyConnector import TweepyConnector
 from util.util import Config, is_folder_exists, create_dir, multiprocess_data_collection
 
 from util.util import DataCollector
@@ -29,7 +29,7 @@ def get_user_ids_in_folder(samples_folder):
     return user_ids
 
 
-def dump_user_profile_job(user_id, save_location, twython_connector: TwythonConnector):
+def dump_user_profile_job(user_id, save_location, twython_connector: TweepyConnector):
     profile_info = None
 
     # Fetch and save user information if the file is not already present
@@ -45,7 +45,7 @@ def dump_user_profile_job(user_id, save_location, twython_connector: TwythonConn
                 json.dump(profile_info, open("{}/{}.json".format(save_location, user_id), "w"))
 
 
-def dump_user_recent_tweets_job(user_id, save_location, twython_connector: TwythonConnector):
+def dump_user_recent_tweets_job(user_id, save_location, twython_connector: TweepyConnector):
     profile_info = None
 
     # Fetch and save user information if the file is not already present
@@ -86,7 +86,7 @@ def fetch_user_friends_ids(user_id, twython_connection):
     return user_friends
 
 
-def dump_user_followers(user_id, save_location, twython_connector: TwythonConnector):
+def dump_user_followers(user_id, save_location, twython_connector: TweepyConnector):
 
     # Fetch and save user information if the file is not already present
     if not Path("{}/{}.json".format(save_location, user_id)).is_file():
@@ -100,7 +100,7 @@ def dump_user_followers(user_id, save_location, twython_connector: TwythonConnec
             logging.exception("Exception in getting follower_ids for user : {}".format(user_id))
 
 
-def dump_user_following(user_id, save_location, twython_connector: TwythonConnector):
+def dump_user_following(user_id, save_location, twython_connector: TweepyConnector):
 
     # Fetch and save user information if the file is not already present
     if not Path("{}/{}.json".format(save_location, user_id)).is_file():
@@ -115,7 +115,7 @@ def dump_user_following(user_id, save_location, twython_connector: TwythonConnec
 
 
 
-def collect_user_profiles(config: Config, twython_connector: TwythonConnector):
+def collect_user_profiles(config: Config, twython_connector: TweepyConnector):
     dump_location = config.dump_location
 
     all_user_ids = set()

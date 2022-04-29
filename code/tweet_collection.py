@@ -2,8 +2,7 @@ import json
 import logging
 from multiprocessing.pool import Pool
 
-from util.TwythonConnector import TwythonConnector
-from twython import TwythonError, TwythonRateLimitError
+from util.TweepyConnector import TweepyConnector
 
 from util.util import create_dir, Config, multiprocess_data_collection
 
@@ -22,7 +21,7 @@ class Tweet:
         self.label = label
 
 
-def dump_tweet_information(tweet_chunk: list, config: Config, twython_connector: TwythonConnector):
+def dump_tweet_information(tweet_chunk: list, config: Config, tweepy_connector: TweepyConnector):
     """Collect info and dump info of tweet chunk containing atmost 100 tweets"""
 
     tweet_list = []
@@ -30,21 +29,19 @@ def dump_tweet_information(tweet_chunk: list, config: Config, twython_connector:
         tweet_list.append(tweet.tweet_id)
 
     try:
-        tweet_objects_map = twython_connector.get_twython_connection(Constants.GET_TWEET).lookup_status(id=tweet_list,
-                                                                                                    include_entities=True,
-                                                                                                    map=True)['id']
+        tweet_objects_map = tweepy_connector.get_tweepy_connection(Constants.GET_TWEET).get_tweet(id=tweet_list[0])
+        print(tweet_objects_map)
+
         for tweet in tweet_chunk:
             tweet_object = tweet_objects_map[str(tweet.tweet_id)]
             if tweet_object:
+                print(tweet_object)
                 dump_dir = "{}/{}/{}/{}".format(config.dump_location, tweet.news_source, tweet.label, tweet.news_id)
                 tweet_dir = "{}/tweets".format(dump_dir)
                 create_dir(dump_dir)
                 create_dir(tweet_dir)
 
                 json.dump(tweet_object, open("{}/{}.json".format(tweet_dir, tweet.tweet_id), "w"))
-
-    except TwythonRateLimitError:
-        logging.exception("Twython API rate limit exception")
 
     except Exception as ex:
         logging.exception("exception in collecting tweet objects")
@@ -65,8 +62,8 @@ def collect_tweets(news_list, news_source, label, config: Config):
         for tweet_id in news.tweet_ids:
             tweet_id_list.append(Tweet(tweet_id, news.news_id, news_source, label))
 
-    tweet_chunks = equal_chunks(tweet_id_list, 100)
-    multiprocess_data_collection(dump_tweet_information, tweet_chunks, (config, config.twython_connector), config)
+    tweet_chunks = equal_chunks(tweet_id_list, 1)
+    multiprocess_data_collection(dump_tweet_information, tweet_chunks, (config, config.tweepy_connector), config)
 
 
 class TweetCollector(DataCollector):
