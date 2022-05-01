@@ -21,7 +21,7 @@ class TweepyConnector:
         """
         keys = json.load(open(keys_file, 'r'))
         for key in keys:
-            self.streams.append(self._get_twitter_connection(connection_mode=1, app_key=key['app_key'],
+            self.streams.append(self._get_twitter_connection(connection_mode=0, app_key=key['app_key'],
                                                              app_secret=key['app_secret'],
                                                              oauth_token=key['oauth_token'],
                                                              oauth_token_secret=key['oauth_token_secret']))
@@ -42,7 +42,8 @@ class TweepyConnector:
             )
 
         elif connection_mode == 0:  # App auth mode - more requests are allowe
-            pass
+            return tweepy.Client(oauth_token)
+
         #     # TODO: Fix the code later - app auth has more limit
         #     # twitter = Twython(app_key, app_secret, oauth_version=2)
         #     # access_token = twitter.obtain_access_token()

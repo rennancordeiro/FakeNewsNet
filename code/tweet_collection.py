@@ -11,6 +11,7 @@ from util import Constants
 
 from util.util import equal_chunks
 
+FIELDS = [ "created_at"]
 
 class Tweet:
 
@@ -29,23 +30,25 @@ def dump_tweet_information(tweet_chunk: list, config: Config, tweepy_connector: 
         tweet_list.append(tweet.tweet_id)
 
     try:
-        tweet_objects_map = tweepy_connector.get_tweepy_connection(Constants.GET_TWEET).get_tweet(id=tweet_list[0])
-        print(tweet_objects_map)
+        client = tweepy_connector.get_tweepy_connection(Constants.GET_TWEET)
+        tweet_objects = client.get_tweets(ids=tweet_list, tweet_fields=FIELDS)
 
-        for tweet in tweet_chunk:
-            tweet_object = tweet_objects_map[str(tweet.tweet_id)]
+
+        tweets = {tweet.tweet_id: tweet for tweet in tweet_chunk}
+        tweet_chunk = []
+        for tweet in tweet_objects.data:
+            tweet_chunk.append(tweets[tweet.id])
+
+        for tweet_object, tweet in zip(tweet_objects.data, tweet_chunk):
             if tweet_object:
-                print(tweet_object)
                 dump_dir = "{}/{}/{}/{}".format(config.dump_location, tweet.news_source, tweet.label, tweet.news_id)
                 tweet_dir = "{}/tweets".format(dump_dir)
                 create_dir(dump_dir)
                 create_dir(tweet_dir)
-
-                json.dump(tweet_object, open("{}/{}.json".format(tweet_dir, tweet.tweet_id), "w"))
+                json.dump(dict(tweet_object), open("{}/{}.json".format(tweet_dir, tweet.tweet_id), "w"), default=str)
 
     except Exception as ex:
         logging.exception("exception in collecting tweet objects")
-
     return None
 
 
@@ -62,7 +65,7 @@ def collect_tweets(news_list, news_source, label, config: Config):
         for tweet_id in news.tweet_ids:
             tweet_id_list.append(Tweet(tweet_id, news.news_id, news_source, label))
 
-    tweet_chunks = equal_chunks(tweet_id_list, 1)
+    tweet_chunks = equal_chunks(tweet_id_list, 10)
     multiprocess_data_collection(dump_tweet_information, tweet_chunks, (config, config.tweepy_connector), config)
 
 
